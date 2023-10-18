@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replace '\n' with Newline</title>
+</head>
+<body>
+
+<!-- Input and Output Textareas -->
+<label for="inputText">Input:</label>
+<textarea id="inputText" rows="10" cols="50"></textarea>
+
+<br><br>
+
+<label for="outputText">Output:</label>
+<textarea id="outputText" rows="10" cols="50" readonly></textarea>
+
+<br><br>
+
+<!-- Convert Button -->
+<button onclick="convertText()">Convert</button>
+
+<script>
+    function convertText() {
+        // Get the text from the input textarea
+        let inputText = document.getElementById('inputText').value;
+
+        // Replace '\n' with actual newlines
+        let outputText = inputText.replace(/\\n/g, '\n');
+
+        // Set the text for the output textarea
+        document.getElementById('outputText').value = outputText;
+    }
+</script>
+
+</body>
+</html>
