@@ -56,7 +56,7 @@
 <script>
     function convertText() {
         let inputText = document.getElementById('inputText').value;
-        let outputText = inputText.replace(/\\n/g, '\n');
+        let outputText = inputText.replace(/\\n/g, '\n').replace(/\\"/g, '"');
         document.getElementById('outputText').value = outputText;
     }
 </script>
