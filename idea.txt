@@ -1,0 +1,2 @@
+Add Non-Translatable Characters:
+Insert non-translatable characters or modifiers like underscores, characters from different scripts, or invisible Unicode characters such as Zero Width Space (​) or Zero Width Non-Joiner (‌). For example, if you don't want to translate the term "TechTerms", you could write it as "Tech_Terms" or "Tech​Terms". The insertion is subtle and may not be recognized as a separate character to be translated.
