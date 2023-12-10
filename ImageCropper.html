@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropper</title>
+    <style>
+		body, html {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-family: Arial, sans-serif;
+			box-sizing: border-box; /* Ensure padding/border are included in total width/height */
+		}
+
+		.container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 100%;
+			max-width: 320px; /* Set a max width for the container */
+			padding: 20px;
+			box-sizing: border-box;
+		}
+
+		#image-panel {
+			width: 300px; /* Fixed width */
+			height: 300px; /* Fixed height, same as width */
+			border: 1px solid #ddd;
+			margin-bottom: 20px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			overflow: hidden;
+			background-color: #f8f8f8; /* Optional: to make the panel more visible */
+			box-sizing: border-box;
+		}
+		
+		img {
+			max-width: 100%; /* Limit image width to not exceed panel */
+			max-height: 100%; /* Limit image height to not exceed panel */
+			object-fit: contain; /* Ensures image is contained within the panel */
+		}
+
+		#upload-button, #crop-download-button {
+			width: 100%; /* Full width of the container */
+			padding: 10px;
+			margin-bottom: 10px;
+			box-sizing: border-box;
+		}
+    </style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"/>
+
+</head>
+<body>
+    <div class="container">
+        <div id="image-panel">
+            <!-- Image will be displayed here -->
+        </div>
+        <input type="file" id="upload-button" accept="image/*">
+        <button id="crop-download-button">Crop & Download</button>
+    </div>
+    <script>
+	document.addEventListener('DOMContentLoaded', function() {
+    var imagePanel = document.getElementById('image-panel');
+    var uploadButton = document.getElementById('upload-button');
+    var cropDownloadButton = document.getElementById('crop-download-button');
+    var cropper;
+
+    uploadButton.addEventListener('change', function(event) {
+        imagePanel.innerHTML = ''; // Clear the panel
+        var file = event.target.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+            var img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100%';
+            imagePanel.appendChild(img);
+
+            // Initialize Cropper
+            cropper = new Cropper(img, {
+                aspectRatio: 2 / 3,
+                autoCropArea: 1
+            });
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    cropDownloadButton.addEventListener('click', function() {
+        if (cropper) {
+            // Get the cropped canvas
+            var croppedCanvas = cropper.getCroppedCanvas();
+
+            // Convert the canvas to a Blob and then download it
+            croppedCanvas.toBlob(function(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'cropped-image.png';
+                a.click();
+
+                // Cleanup
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
