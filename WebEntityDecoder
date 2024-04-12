@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Entity Decoder</title>
+<script>
+  function decodeHtmlEntities() {
+    var inputText = document.getElementById("inputText").value;
+    var outputDiv = document.getElementById("outputText");
+    var textArea = document.createElement('textarea');
+    textArea.innerHTML = inputText;
+    // innerText를 사용하여 HTML 태그가 적용되지 않게 함
+    outputDiv.innerText = textArea.value;
+  }
+</script>
+</head>
+<body>
+
+<h2>HTML Entity Decoder</h2>
+
+<label for="inputText">텍스트 입력:</label>
+<textarea id="inputText" rows="4" cols="50"></textarea><br><br>
+
+<button onclick="decodeHtmlEntities()">변환하기</button>
+
+<div id="outputText"></div>
+
+</body>
+</html>
