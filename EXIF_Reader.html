@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXIF Reader</title>
+    <script src="https://cdn.jsdelivr.net/npm/exifreader@4.25.0/dist/exif-reader.min.js"></script>
+</head>
+<body>
+    <h1>EXIF Data Extractor</h1>
+    <input type="file" id="imageInput" accept="image/jpeg, image/png" multiple />
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('imageInput').addEventListener('change', async function (event) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = ''; // Clear previous results
+            const files = event.target.files;
+
+            for (const file of files) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const exifData = ExifReader.load(arrayBuffer);
+
+                    const fileDetails = `<h2>${file.name}</h2>`;
+                    const exifDetails = Object.keys(exifData)
+                        .map(key => `<p><strong>${key}</strong>: ${exifData[key].description || exifData[key].value}</p>`)
+                        .join('');
+
+                    outputDiv.innerHTML += fileDetails + exifDetails;
+                } catch (error) {
+                    outputDiv.innerHTML += `<p>Could not read EXIF data from ${file.name} due to ${error}</p>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
