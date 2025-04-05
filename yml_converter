@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YML English to Korean Converter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #3498db;
+            background-color: #f7f9fc;
+        }
+        .upload-area input {
+            display: none;
+        }
+        .upload-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .upload-button:hover {
+            background-color: #2980b9;
+        }
+        .file-list {
+            margin: 20px 0;
+        }
+        .file-item {
+            padding: 10px 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: inline-block;
+            margin: 5px;
+        }
+        .primary-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .primary-btn:hover {
+            background-color: #27ae60;
+        }
+        .secondary-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .secondary-btn:hover {
+            background-color: #c0392b;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+        }
+        .error {
+            background-color: #fadbd8;
+            color: #e74c3c;
+        }
+        .hidden {
+            display: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>YML English to Korean Converter</h1>
+    
+    <div class="container">
+        <p>이 도구는 YML 파일 내에서 'l_english:'를 'l_korean:'으로 변경하고 파일 이름도 동일하게 바꿔줍니다.</p>
+        
+        <div class="upload-area" id="drop-area">
+            <p>YML 파일을 끌어서 놓거나 아래 버튼을 클릭하세요</p>
+            <label for="file-upload" class="upload-button">
+                YML 파일 선택
+            </label>
+            <input type="file" id="file-upload" accept=".yml" multiple>
+        </div>
+        
+        <div id="file-list" class="file-list"></div>
+        
+        <div class="actions">
+            <button id="convert-btn" class="btn primary-btn hidden">파일 변환</button>
+            <button id="download-btn" class="btn secondary-btn hidden">변환된 파일 다운로드</button>
+        </div>
+        
+        <div id="status" class="status hidden"></div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 YML Converter | Created for GitHub Pages</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileUpload = document.getElementById('file-upload');
+            const dropArea = document.getElementById('drop-area');
+            const fileList = document.getElementById('file-list');
+            const convertBtn = document.getElementById('convert-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const statusDiv = document.getElementById('status');
+            
+            let uploadedFiles = [];
+            let processedFiles = [];
+            
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            // Handle dropped files
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight() {
+                dropArea.style.borderColor = '#3498db';
+                dropArea.style.backgroundColor = '#f0f8ff';
+            }
+            
+            function unhighlight() {
+                dropArea.style.borderColor = '#ccc';
+                dropArea.style.backgroundColor = 'white';
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+            
+            // Event listener for file upload via button
+            fileUpload.addEventListener('change', (event) => {
+                handleFiles(event.target.files);
+            });
+            
+            function handleFiles(files) {
+                uploadedFiles = Array.from(files);
+                
+                // Filter only .yml files containing 'l_english'
+                uploadedFiles = uploadedFiles.filter(file => 
+                    file.name.endsWith('.yml') && file.name.includes('l_english'));
+                
+                if (uploadedFiles.length === 0) {
+                    showStatus('유효한 YML 파일을 찾을 수 없습니다. .yml 확장자와 "l_english"가 포함된 파일을 선택해주세요.', 'error');
+                    return;
+                }
+                
+                // Display the list of files
+                fileList.innerHTML = '';
+                uploadedFiles.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.textContent = file.name;
+                    fileList.appendChild(fileItem);
+                });
+                
+                // Show convert button
+                convertBtn.classList.remove('hidden');
+                downloadBtn.classList.add('hidden');
+                statusDiv.classList.add('hidden');
+            }
+            
+            // Event listener for convert button
+            convertBtn.addEventListener('click', async () => {
+                if (uploadedFiles.length === 0) {
+                    showStatus('변환할 파일이 없습니다.', 'error');
+                    return;
+                }
+                
+                processedFiles = [];
+                
+                try {
+                    for (const file of uploadedFiles) {
+                        const content = await readFile(file);
+                        
+                        // Split content into lines
+                        const lines = content.split('\n');
+                        
+                        // Replace 'l_english:' with 'l_korean:' in the first line
+                        if (lines.length > 0) {
+                            lines[0] = lines[0].replace('_english:', '_korean:');
+                        }
+                        
+                        // Join the lines back together
+                        const newContent = lines.join('\n');
+                        
+                        // Create a new file name
+                        const newFileName = file.name.replace('l_english', 'l_korean');
+                        
+                        // Add to processed files
+                        processedFiles.push({
+                            name: newFileName,
+                            content: newContent
+                        });
+                    }
+                    
+                    showStatus(`${processedFiles.length}개의 파일이 성공적으로 변환되었습니다.`, 'success');
+                    downloadBtn.classList.remove('hidden');
+                } catch (error) {
+                    showStatus(`파일 변환 중 오류 발생: ${error.message}`, 'error');
+                }
+            });
+            
+            // Event listener for download button
+            downloadBtn.addEventListener('click', () => {
+                if (processedFiles.length === 0) {
+                    showStatus('다운로드할 변환된 파일이 없습니다.', 'error');
+                    return;
+                }
+                
+                // Download each file
+                processedFiles.forEach(file => {
+                    downloadFile(file.name, file.content);
+                });
+                
+                showStatus(`${processedFiles.length}개의 파일 다운로드가 시작되었습니다.`, 'success');
+            });
+            
+            // Function to read file content
+            function readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        resolve(e.target.result);
+                    };
+                    
+                    reader.onerror = (e) => {
+                        reject(new Error('파일 읽기 오류.'));
+                    };
+                    
+                    reader.readAsText(file);
+                });
+            }
+            
+            // Function to download a file
+            function downloadFile(fileName, content) {
+                const blob = new Blob([content], { type: 'text/yaml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+            // Function to show status messages
+            function showStatus(message, type) {
+                statusDiv.textContent = message;
+                statusDiv.className = `status ${type}`;
+                statusDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
